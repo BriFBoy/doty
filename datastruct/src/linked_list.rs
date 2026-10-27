@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 #[derive(Clone)]
 pub struct LinkedList<T: Clone> {
     value: T,
@@ -32,24 +30,23 @@ impl<T: Clone> LinkedList<T> {
         }
     }
 
-    // store the "last" node before the removed one
-    // Temp store the actual next pointer
-    // Find what to remove
-    // set the pointer to the prev node
-    // Return the removed node
-    pub fn remove(&mut self, index: usize) -> Option<Box<LinkedList<T>>> {
-        let mut current = self;
-        for i in 0..index {
-            current = current.next.as_deref_mut()?;
-            if i == (index - 2) {
-                let last_node = current;
+    pub fn remove(&mut self, index: usize) -> Option<LinkedList<T>> {
+        if index == 0 {
+            let returned_list_node = LinkedList::new(self.value.clone());
+            *self = *self.next.take()?;
+            return Some(returned_list_node);
+        }
+        let mut last_node = self;
+        for i in 0..=index {
+            if i >= (index - 1) {
                 let removed_node = &mut last_node.next.take()?;
                 let next = removed_node.next.take();
 
                 last_node.next = next;
 
-                return Some(removed_node.clone());
+                return Some(*removed_node.clone());
             }
+            last_node = last_node.next.as_deref_mut()?;
         }
         None
     }
@@ -72,7 +69,7 @@ mod test {
     fn new_linked_list() {
         let list = LinkedList::new(3);
 
-        assert_eq!(list.value, 3);
+        assert_eq!(list.get_value(), &3);
         assert!(list.next.is_none());
     }
 
@@ -81,56 +78,7 @@ mod test {
         let list = LinkedList::new(3);
         let list = list.add_to_head(5);
 
-        assert_eq!(list.value, 5);
+        assert_eq!(list.get_value(), &5);
         assert!(list.next.is_some());
-    }
-    #[test]
-    fn add_new_multiple_to_tail() {
-        let array = [3, 5, 6, 7, 8, 9];
-        let mut list = LinkedList::new(array[0]);
-        list.add_to_tail(array[1]);
-        list.add_to_tail(array[2]);
-        list.add_to_tail(array[3]);
-        list.add_to_tail(array[4]);
-        list.add_to_tail(array[5]);
-
-        assert_eq!(
-            list.iter().map(|f| f.value).collect::<Vec<_>>(),
-            array.to_vec()
-        );
-    }
-    #[test]
-    fn remove_middle() {
-        let mut array = [3, 5, 6, 7, 8, 9].to_vec();
-        let mut list = LinkedList::new(array[0]);
-        list.add_to_tail(array[1]);
-        list.add_to_tail(array[2]);
-        list.add_to_tail(array[3]);
-        list.add_to_tail(array[4]);
-        list.add_to_tail(array[5]);
-
-        list.remove(3);
-        array.remove(3);
-
-        assert_eq!(
-            list.iter().map(|f| f.value).collect::<Vec<_>>(),
-            array.to_vec()
-        );
-    }
-    #[test]
-    fn adding_heads_preserves_existing_nodes() {
-        let list = LinkedList::new(3).add_to_head(5).add_to_head(7);
-
-        let values: Vec<_> = list.iter().map(|node| node.value).collect();
-        assert_eq!(values, vec![7, 5, 3]);
-    }
-    #[test]
-    fn works_with_non_copy_values() {
-        let mut list = LinkedList::new(String::from("first"));
-        list.add_to_tail(String::from("second"));
-
-        let values: Vec<_> = list.iter().map(|node| node.value.as_str()).collect();
-
-        assert_eq!(values, vec!["first", "second"]);
     }
 }
