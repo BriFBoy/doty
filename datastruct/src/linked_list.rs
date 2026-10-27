@@ -1,3 +1,6 @@
+use std::ops::Deref;
+
+#[derive(Clone)]
 pub struct LinkedList<T: Clone> {
     value: T,
     next: Option<Box<LinkedList<T>>>,
@@ -27,6 +30,28 @@ impl<T: Clone> LinkedList<T> {
             value,
             next: Some(Box::new(self)),
         }
+    }
+
+    // store the "last" node before the removed one
+    // Temp store the actual next pointer
+    // Find what to remove
+    // set the pointer to the prev node
+    // Return the removed node
+    pub fn remove(&mut self, index: usize) -> Option<Box<LinkedList<T>>> {
+        let mut current = self;
+        for i in 0..index {
+            current = current.next.as_deref_mut()?;
+            if i == (index - 2) {
+                let last_node = current;
+                let removed_node = &mut last_node.next.take()?;
+                let next = removed_node.next.take();
+
+                last_node.next = next;
+
+                return Some(removed_node.clone());
+            }
+        }
+        None
     }
     pub fn add_to_tail(&mut self, value: T) {
         match &mut self.next {
@@ -68,6 +93,24 @@ mod test {
         list.add_to_tail(array[3]);
         list.add_to_tail(array[4]);
         list.add_to_tail(array[5]);
+
+        assert_eq!(
+            list.iter().map(|f| f.value).collect::<Vec<_>>(),
+            array.to_vec()
+        );
+    }
+    #[test]
+    fn remove_middle() {
+        let mut array = [3, 5, 6, 7, 8, 9].to_vec();
+        let mut list = LinkedList::new(array[0]);
+        list.add_to_tail(array[1]);
+        list.add_to_tail(array[2]);
+        list.add_to_tail(array[3]);
+        list.add_to_tail(array[4]);
+        list.add_to_tail(array[5]);
+
+        list.remove(3);
+        array.remove(3);
 
         assert_eq!(
             list.iter().map(|f| f.value).collect::<Vec<_>>(),
