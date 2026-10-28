@@ -1,3 +1,5 @@
+use std::mem;
+
 #[derive(Clone)]
 pub struct LinkedList<T: Clone> {
     value: T,
@@ -23,11 +25,13 @@ impl<T: Clone> LinkedList<T> {
     pub fn get_value(&self) -> &T {
         &self.value
     }
-    pub fn add_to_head(self, value: T) -> LinkedList<T> {
-        LinkedList {
-            value,
-            next: Some(Box::new(self)),
-        }
+    pub fn add_to_head(&mut self, value: T) {
+        let next = self.next.take();
+        let old_value = mem::replace(&mut self.value, value);
+        self.next = Some(Box::new(LinkedList {
+            value: old_value,
+            next,
+        }))
     }
 
     pub fn remove(&mut self, index: usize) -> Option<LinkedList<T>> {
@@ -75,8 +79,8 @@ mod test {
 
     #[test]
     fn add_new_head() {
-        let list = LinkedList::new(3);
-        let list = list.add_to_head(5);
+        let mut list = LinkedList::new(3);
+        list.add_to_head(5);
 
         assert_eq!(list.get_value(), &5);
         assert!(list.next.is_some());

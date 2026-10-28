@@ -95,7 +95,9 @@ fn remove_out_of_bound() {
 }
 #[test]
 fn adding_heads_preserves_existing_nodes() {
-    let list = LinkedList::new(3).add_to_head(5).add_to_head(7);
+    let mut list = LinkedList::new(3);
+    list.add_to_head(5);
+    list.add_to_head(7);
 
     let values: Vec<_> = list.iter().map(|node| *node.get_value()).collect();
     assert_eq!(values, vec![7, 5, 3]);
