@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
-use clap::{Parser, Subcommand, error::ErrorKind};
-use doty::symlink_dir;
+use clap::{Parser, Subcommand};
+use doty::{error::DotyError, symlink_dir};
 
 #[derive(Parser)]
 #[command(version, about)]
@@ -28,18 +28,19 @@ enum Command {
     },
 }
 
-fn main() -> Result<(), ErrorKind> {
+fn main() -> Result<(), DotyError> {
     let cli = Args::parse();
     match cli.command {
         Command::Link { path } => {
-            symlink_dir(&path);
+            symlink_dir(&path)?;
+            println!("Finished symlinking");
         }
         Command::Unlink { path } => {
             println!("Unlinking for: {}", path.into_string().unwrap());
         }
         Command::Install { path } => println!("Installing: {}", path.into_string().unwrap()),
         Command::Uninstall { path } => {
-            println!("Uninstalling: {}", path.into_string().unwrap())
+            println!("Uninstalling: {}", path.into_string().unwrap());
         }
     }
     Ok(())

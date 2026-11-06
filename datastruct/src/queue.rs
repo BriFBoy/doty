@@ -25,9 +25,12 @@ impl<T: Clone> Queue<T> {
         }
     }
 
-    pub fn new(value: T) -> Queue<T> {
-        Queue {
-            list: Some(LinkedList::new(value)),
+    pub fn new(value: Option<T>) -> Queue<T> {
+        match value {
+            Some(value) => Queue {
+                list: Some(LinkedList::new(value)),
+            },
+            None => Queue { list: None },
         }
     }
     pub fn iter(&self) -> Option<LinkedListIterator<'_, T>> {
