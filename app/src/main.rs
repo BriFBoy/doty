@@ -1,7 +1,11 @@
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-use doty::{error::DotyError, symlink_dir};
+use doty::{
+    error::{DotyError, SymlinkError},
+    link::symlink_dir,
+    unlink::unlink,
+};
 
 #[derive(Parser)]
 #[command(version, about)]
@@ -36,11 +40,21 @@ fn main() -> Result<(), DotyError> {
             println!("Finished symlinking");
         }
         Command::Unlink { path } => {
-            println!("Unlinking for: {}", path.into_string().unwrap());
+            unlink(&path)?;
+            println!(
+                "Unlinking for: {}",
+                path.into_string().or(Err(SymlinkError::PathError))?
+            );
         }
-        Command::Install { path } => println!("Installing: {}", path.into_string().unwrap()),
+        Command::Install { path } => println!(
+            "Installing: {}",
+            path.into_string().or(Err(SymlinkError::PathError))?
+        ),
         Command::Uninstall { path } => {
-            println!("Uninstalling: {}", path.into_string().unwrap());
+            println!(
+                "Uninstalling: {}",
+                path.into_string().or(Err(SymlinkError::PathError))?
+            );
         }
     }
     Ok(())
