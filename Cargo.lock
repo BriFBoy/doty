@@ -107,6 +107,7 @@ name = "doty"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "datastruct",
 ]
 
 [[package]]
