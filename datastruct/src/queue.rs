@@ -46,7 +46,7 @@ mod test {
     #[test]
     pub fn append_three() {
         let mut array = [1, 2, 3, 4];
-        let mut queue = Queue::new(array[0]);
+        let mut queue = Queue::new(Some(array[0]));
         queue.append(array[1]);
         queue.append(array[2]);
         queue.append(array[3]);
@@ -65,7 +65,7 @@ mod test {
     #[test]
     pub fn take_one() {
         let mut array = [1, 2, 3, 4].to_vec();
-        let mut queue = Queue::new(array[0]);
+        let mut queue = Queue::new(Some(array[0]));
         queue.append(array[1]);
         queue.append(array[2]);
         queue.append(array[3]);
@@ -87,7 +87,7 @@ mod test {
     #[test]
     pub fn take_two() {
         let mut array = [1, 2, 3, 4].to_vec();
-        let mut queue = Queue::new(array[0]);
+        let mut queue = Queue::new(Some(array[0]));
         queue.append(array[1]);
         queue.append(array[2]);
         queue.append(array[3]);
@@ -112,7 +112,7 @@ mod test {
     #[test]
     pub fn take_more_than_queue_length() {
         let array = [1, 2].to_vec();
-        let mut queue = Queue::new(array[0]);
+        let mut queue = Queue::new(Some(array[0]));
         queue.append(array[1]);
 
         queue.take();
