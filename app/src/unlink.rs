@@ -14,7 +14,8 @@ pub fn unlink(path: &PathBuf) -> Result<(), UnLinkError> {
     let mut queue: Queue<PathBuf> = Queue::new(None);
     current_dir.push(path);
 
-    let items = read_dir(&current_dir)?;
+    let items =
+        read_dir(&current_dir).map_err(|e| SharedError::ReadError(current_dir.clone(), e))?;
     for item in items {
         queue.append(item?.path());
     }
@@ -41,7 +42,7 @@ fn dir_handle(
     let home_path = Path::join(home_dir, relative_path);
 
     if home_path.is_symlink() {
-        remove_dir_all(&home_path).map_err(|_| UnLinkError::RemoveError(home_path))?;
+        remove_dir_all(&home_path).map_err(|e| UnLinkError::RemoveError(home_path, e))?;
     } else if home_path.exists() {
         for item in read_dir(&item).map_err(|e| SharedError::ReadError(item, e))? {
             queue.append(item?.path());
@@ -58,14 +59,15 @@ fn file_handle(home_dir: &Path, current_dir: &PathBuf, item: PathBuf) -> Result<
 
     if !home_path.exists() {
     } else if home_path.is_symlink() {
-        remove_file(&home_path).map_err(|_| UnLinkError::RemoveError(home_path))?;
+        remove_file(&home_path).map_err(|e| UnLinkError::RemoveError(home_path, e))?;
     } else {
         for parent in home_path.ancestors() {
             if parent.is_symlink() {
                 if !parent.starts_with(home_dir) || parent == home_dir {
                     return Ok(());
                 }
-                remove_dir_all(parent).map_err(|_| UnLinkError::RemoveError(home_path))?;
+                remove_dir_all(parent)
+                    .map_err(|e| UnLinkError::RemoveError(parent.to_owned(), e))?;
                 break;
             }
         }

@@ -15,7 +15,8 @@ pub fn symlink_dir(path: &PathBuf) -> Result<(), LinkError> {
     let mut queue: Queue<PathBuf> = Queue::new(None);
     current_dir.push(path);
 
-    let items = read_dir(&current_dir)?;
+    let items =
+        read_dir(&current_dir).map_err(|e| SharedError::ReadError(current_dir.clone(), e))?;
     for item in items {
         queue.append(item?.path());
     }

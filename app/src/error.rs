@@ -28,7 +28,7 @@ pub enum LinkError {
 }
 #[derive(Debug)]
 pub enum UnLinkError {
-    RemoveError(PathBuf),
+    RemoveError(PathBuf, io::Error),
     IoError(io::Error),
     SharedError(SharedError),
 }
@@ -52,11 +52,12 @@ impl Display for DotyError {
 impl Display for UnLinkError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            UnLinkError::RemoveError(path_buf) => {
+            UnLinkError::RemoveError(path_buf, e) => {
                 write!(
                     f,
-                    "Failed to remove file or directory: {}",
-                    path_buf.display()
+                    "Failed to remove file or directory {}, with error: {}",
+                    path_buf.display(),
+                    e
                 )
             }
             UnLinkError::IoError(error) => {
