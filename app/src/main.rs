@@ -2,9 +2,8 @@ use std::{path::PathBuf, process::ExitCode};
 
 use clap::{Parser, Subcommand};
 use doty::{
+    commands::{install::install, link::symlink_dir, unlink::unlink},
     error::{DotyError, SharedError},
-    link::symlink_dir,
-    unlink::unlink,
 };
 
 #[derive(Parser)]
@@ -56,7 +55,7 @@ fn run(cli: Args) -> Result<(), DotyError> {
                 path.into_string().or(Err(SharedError::PathError))?
             );
         }
-        Command::Install { path: _ } => todo!("This will be implemented soon"),
+        Command::Install { path } => install(&path)?,
         Command::Uninstall { path: _ } => todo!("This will be implemented soon"),
     };
     Ok(())
