@@ -1,8 +1,8 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, process::ExitCode};
 
 use clap::{Parser, Subcommand};
 use doty::{
-    error::{DotyError, SymlinkError},
+    error::{DotyError, SharedError},
     link::symlink_dir,
     unlink::unlink,
 };
@@ -32,8 +32,18 @@ enum Command {
     },
 }
 
-fn main() -> Result<(), DotyError> {
+fn main() -> ExitCode {
     let cli = Args::parse();
+
+    if let Err(e) = run(cli) {
+        eprintln!("{}", e);
+        ExitCode::from(1)
+    } else {
+        ExitCode::from(0)
+    }
+}
+
+fn run(cli: Args) -> Result<(), DotyError> {
     match cli.command {
         Command::Link { path } => {
             symlink_dir(&path)?;
@@ -43,19 +53,19 @@ fn main() -> Result<(), DotyError> {
             unlink(&path)?;
             println!(
                 "Unlinking for: {}",
-                path.into_string().or(Err(SymlinkError::PathError))?
+                path.into_string().or(Err(SharedError::PathError))?
             );
         }
         Command::Install { path } => println!(
             "Installing: {}",
-            path.into_string().or(Err(SymlinkError::PathError))?
+            path.into_string().or(Err(SharedError::PathError))?
         ),
         Command::Uninstall { path } => {
             println!(
                 "Uninstalling: {}",
-                path.into_string().or(Err(SymlinkError::PathError))?
+                path.into_string().or(Err(SharedError::PathError))?
             );
         }
-    }
+    };
     Ok(())
 }

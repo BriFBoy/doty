@@ -7,10 +7,10 @@ use std::{
 
 use datastruct::queue::Queue;
 
-use crate::error::SymlinkError;
+use crate::error::{LinkError, SharedError};
 
-pub fn symlink_dir(path: &PathBuf) -> Result<(), SymlinkError> {
-    let home_dir = home_dir().ok_or(SymlinkError::FileExits)?;
+pub fn symlink_dir(path: &PathBuf) -> Result<(), LinkError> {
+    let home_dir = home_dir().ok_or(SharedError::HomeDirError)?;
     let mut current_dir = current_dir()?;
     let mut queue: Queue<PathBuf> = Queue::new(None);
     current_dir.push(path);
@@ -21,7 +21,7 @@ pub fn symlink_dir(path: &PathBuf) -> Result<(), SymlinkError> {
     }
     while let Some(item) = queue.take() {
         if item.is_dir() {
-            dir_handle(&home_dir, &current_dir, &mut queue, &item)?;
+            dir_handle(&home_dir, &current_dir, &mut queue, item)?;
         } else if item.is_file() {
             file_handle(&home_dir, &current_dir, item)?;
         }
@@ -32,34 +32,34 @@ pub fn symlink_dir(path: &PathBuf) -> Result<(), SymlinkError> {
 
 fn dir_handle(
     home_dir: &Path,
-    current_dir: &PathBuf,
+    current_dir: &Path,
     queue: &mut Queue<PathBuf>,
-    item: &PathBuf,
-) -> Result<(), SymlinkError> {
+    item: PathBuf,
+) -> Result<(), LinkError> {
     let relative_path = item
         .strip_prefix(current_dir)
-        .or(Err(SymlinkError::PathError))?;
+        .or(Err(SharedError::PathError))?;
     let home_path = Path::join(home_dir, relative_path);
 
     if !home_path.exists() {
-        symlink(item, home_path)?;
+        symlink(&item, home_path).map_err(|e| LinkError::SymlinkError(item, e))?;
     } else if home_path.is_symlink() {
     } else {
-        for item in read_dir(item)? {
+        for item in read_dir(&item).map_err(|e| SharedError::ReadError(item, e))? {
             queue.append(item?.path());
         }
     }
     Ok(())
 }
 
-fn file_handle(home_dir: &Path, current_dir: &PathBuf, item: PathBuf) -> Result<(), SymlinkError> {
+fn file_handle(home_dir: &Path, current_dir: &PathBuf, item: PathBuf) -> Result<(), LinkError> {
     let relative_path = item
         .strip_prefix(current_dir)
-        .or(Err(SymlinkError::PathError))?;
+        .or(Err(SharedError::PathError))?;
     let home_path = Path::join(home_dir, relative_path);
 
     if !home_path.exists() {
-        symlink(item, home_path)?;
+        symlink(&item, home_path).map_err(|e| LinkError::SymlinkError(item, e))?;
         return Ok(());
     } else if home_path.is_symlink() {
         return Ok(());
@@ -70,5 +70,5 @@ fn file_handle(home_dir: &Path, current_dir: &PathBuf, item: PathBuf) -> Result<
             }
         }
     }
-    Err(SymlinkError::FileExits)
+    Err(LinkError::FileExits(home_path))
 }
