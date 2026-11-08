@@ -56,16 +56,8 @@ fn run(cli: Args) -> Result<(), DotyError> {
                 path.into_string().or(Err(SharedError::PathError))?
             );
         }
-        Command::Install { path } => println!(
-            "Installing: {}",
-            path.into_string().or(Err(SharedError::PathError))?
-        ),
-        Command::Uninstall { path } => {
-            println!(
-                "Uninstalling: {}",
-                path.into_string().or(Err(SharedError::PathError))?
-            );
-        }
+        Command::Install { path: _ } => todo!("This will be implemented soon"),
+        Command::Uninstall { path: _ } => todo!("This will be implemented soon"),
     };
     Ok(())
 }
