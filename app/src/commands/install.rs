@@ -26,13 +26,15 @@ pub fn install(package: &Path) -> Result<(), DotyError> {
     {
         let metadata = fs::metadata(&os.script).unwrap();
         let mut permisitons = metadata.permissions();
-        permisitons.set_mode(permisitons.mode() | 0o100);
-        fs::set_permissions(&os.script, permisitons).map_err(|e| {
-            DotyError::SharedError(SharedError::PermissionError(
-                "Unable to set permissions".to_string(),
-                e,
-            ))
-        })?;
+        if permisitons.mode() & 0o100 == 0 {
+            permisitons.set_mode(permisitons.mode() | 0o100);
+            fs::set_permissions(&os.script, permisitons).map_err(|e| {
+                DotyError::SharedError(SharedError::PermissionError(
+                    "Unable to set permissions".to_string(),
+                    e,
+                ))
+            })?;
+        }
 
         let output = Command::new(os.script).output().map_err(|e| {
             DotyError::SharedError(SharedError::PermissionError(
