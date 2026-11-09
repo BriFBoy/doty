@@ -1,4 +1,4 @@
-use std::{env::current_dir, fs, path::Path};
+use std::{env::current_dir, fs, os::unix::fs::PermissionsExt, path::Path, process::Command};
 
 use which_os::{get_os_type, ostypes::Os};
 
@@ -22,8 +22,25 @@ pub fn install(package: &Path) -> Result<(), DotyError> {
 
     if let Some(os) = config.fedora
         && os_type == Os::Fedora
+        && os.script.exists()
     {
-        println!("running {}", os.script);
+        let metadata = fs::metadata(&os.script).unwrap();
+        let mut permisitons = metadata.permissions();
+        permisitons.set_mode(permisitons.mode() | 0o100);
+        fs::set_permissions(&os.script, permisitons).map_err(|e| {
+            DotyError::SharedError(SharedError::PermissionError(
+                "Unable to set permissions".to_string(),
+                e,
+            ))
+        })?;
+
+        let output = Command::new(os.script).output().map_err(|e| {
+            DotyError::SharedError(SharedError::PermissionError(
+                "Unable to execute script".to_string(),
+                e,
+            ))
+        })?;
+        println!("{}", String::from_utf8_lossy(&output.stdout));
     }
 
     Ok(())

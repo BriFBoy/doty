@@ -18,6 +18,7 @@ pub enum SharedError {
     HomeDirError,
     ReadError(PathBuf, io::Error),
     PathError,
+    PermissionError(String, io::Error),
 }
 #[derive(Debug)]
 pub enum LinkError {
@@ -81,6 +82,9 @@ impl Display for SharedError {
                     path_buf.display(),
                     error
                 )
+            }
+            SharedError::PermissionError(message, error) => {
+                write!(f, "{}, error: {}", message, error)
             }
         }
     }

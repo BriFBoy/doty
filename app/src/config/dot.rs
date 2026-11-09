@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
@@ -7,5 +9,5 @@ pub struct Dot {
 
 #[derive(Deserialize, Debug)]
 pub struct DotConfig {
-    pub script: String,
+    pub script: PathBuf,
 }

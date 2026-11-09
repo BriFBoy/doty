@@ -1,2 +1,2 @@
 [fedora]
-script = "script"
+script = "./test_dir/run.sh"
