@@ -1,2 +1,3 @@
 [fedora]
-script = "./test_dir/run.sh"
+install = "./test_dir/install.sh"
+uninstall = "./test_dir/uninstall.sh"

@@ -9,5 +9,6 @@ pub struct Dot {
 
 #[derive(Deserialize, Debug)]
 pub struct DotConfig {
-    pub script: PathBuf,
+    pub install: PathBuf,
+    pub uninstall: PathBuf,
 }

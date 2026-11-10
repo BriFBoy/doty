@@ -2,8 +2,8 @@ use std::{path::PathBuf, process::ExitCode};
 
 use clap::{Parser, Subcommand};
 use doty::{
-    commands::{install::install, link::symlink_dir, unlink::unlink},
-    error::{DotyError, SharedError},
+    commands::{install::install, link::symlink_dir, uninstall::uninstall, unlink::unlink},
+    error::DotyError,
 };
 
 #[derive(Parser)]
@@ -50,13 +50,10 @@ fn run(cli: Args) -> Result<(), DotyError> {
         }
         Command::Unlink { path } => {
             unlink(&path)?;
-            println!(
-                "Unlinking for: {}",
-                path.into_string().or(Err(SharedError::PathError))?
-            );
+            println!("Finished Unlinking");
         }
         Command::Install { path } => install(&path)?,
-        Command::Uninstall { path: _ } => todo!("This will be implemented soon"),
+        Command::Uninstall { path } => uninstall(&path)?,
     };
     Ok(())
 }
