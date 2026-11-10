@@ -6,6 +6,12 @@ use crate::{
 pub mod os_release;
 pub mod ostypes;
 
+pub fn get_os_id() -> Option<String> {
+    let map = pars_os_release().ok()?;
+    let os_string = map.get("ID")?;
+
+    Some(os_string.clone())
+}
 pub fn get_os_type() -> Option<Os> {
     let map = pars_os_release().ok()?;
     let os_string = map.get("ID")?;
