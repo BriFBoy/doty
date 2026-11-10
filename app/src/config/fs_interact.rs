@@ -1,4 +1,4 @@
-use std::{env::current_dir, fs, os::unix::fs::PermissionsExt, path::Path};
+use std::{env::current_dir, fs, os::unix::fs::PermissionsExt, path::Path, process::Command};
 
 use crate::{
     config::dot::Dot,
@@ -30,5 +30,17 @@ pub fn set_needed_permissions(script: &Path) -> Result<(), DotyError> {
         })?;
     }
 
+    Ok(())
+}
+
+pub fn run_script(script: &Path) -> Result<(), DotyError> {
+    set_needed_permissions(script)?;
+
+    let mut child = Command::new(script)
+        .spawn()
+        .map_err(|e| DotyError::SharedError(SharedError::PermissionError("".to_string(), e)))?;
+    child
+        .wait()
+        .map_err(|_| DotyError::SharedError(SharedError::HomeDirError))?;
     Ok(())
 }

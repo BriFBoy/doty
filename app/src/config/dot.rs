@@ -1,10 +1,10 @@
-use std::path::PathBuf;
+use std::{collections::HashMap, path::PathBuf};
 
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
 pub struct Dot {
-    pub fedora: Option<DotConfig>,
+    pub target: HashMap<String, DotConfig>,
 }
 
 #[derive(Deserialize, Debug)]

@@ -12,6 +12,7 @@ pub enum DotyError {
     UnLinkError(UnLinkError),
     SharedError(SharedError),
     ParsError,
+    NoConfigForOs,
 }
 
 #[derive(Debug)]
@@ -49,6 +50,7 @@ impl Display for DotyError {
             DotyError::UnLinkError(un_link_error) => write!(f, "{}", un_link_error),
             DotyError::SharedError(shared_error) => write!(f, "{}", shared_error),
             DotyError::ParsError => write!(f, "Unable to pars config"),
+            DotyError::NoConfigForOs => write!(f, "No config for this OS"),
         }
     }
 }
