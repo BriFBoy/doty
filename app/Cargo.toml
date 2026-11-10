@@ -9,6 +9,3 @@ datastruct = { path = "../datastruct" }
 which_os = { path = "../which_os/" }
 serde = { version = "1.0.229", features = ["derive"] }
 toml = "1.2.1"
-
-[install]
-root = "~/.local/bin"

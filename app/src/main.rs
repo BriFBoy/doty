@@ -16,19 +16,15 @@ struct Args {
 #[derive(Subcommand)]
 enum Command {
     /// Symlinks a folder
-    Link {
-        path: PathBuf,
-    },
+    #[command(visible_alias = "l")]
+    Link { path: PathBuf },
     /// Removes symlink a folder
-    Unlink {
-        path: PathBuf,
-    },
-    Install {
-        path: PathBuf,
-    },
-    Uninstall {
-        path: PathBuf,
-    },
+    #[command(visible_alias = "ul")]
+    Unlink { path: PathBuf },
+    #[command(visible_alias = "i")]
+    Install { path: PathBuf },
+    #[command(visible_alias = "ui")]
+    Uninstall { path: PathBuf },
 }
 
 fn main() -> ExitCode {
