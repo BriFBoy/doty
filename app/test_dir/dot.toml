@@ -1,0 +1,4 @@
+
+[target.fedora]
+install = "./test_dir/install.sh"
+uninstall = "./test_dir/uninstall.sh"

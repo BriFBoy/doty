@@ -2,9 +2,8 @@ use std::{path::PathBuf, process::ExitCode};
 
 use clap::{Parser, Subcommand};
 use doty::{
-    error::{DotyError, SharedError},
-    link::symlink_dir,
-    unlink::unlink,
+    commands::{install::install, link::symlink_dir, uninstall::uninstall, unlink::unlink},
+    error::DotyError,
 };
 
 #[derive(Parser)]
@@ -17,19 +16,15 @@ struct Args {
 #[derive(Subcommand)]
 enum Command {
     /// Symlinks a folder
-    Link {
-        path: PathBuf,
-    },
+    #[command(visible_alias = "l")]
+    Link { path: PathBuf },
     /// Removes symlink a folder
-    Unlink {
-        path: PathBuf,
-    },
-    Install {
-        path: PathBuf,
-    },
-    Uninstall {
-        path: PathBuf,
-    },
+    #[command(visible_alias = "ul")]
+    Unlink { path: PathBuf },
+    #[command(visible_alias = "i")]
+    Install { path: PathBuf },
+    #[command(visible_alias = "ui")]
+    Uninstall { path: PathBuf },
 }
 
 fn main() -> ExitCode {
@@ -51,13 +46,10 @@ fn run(cli: Args) -> Result<(), DotyError> {
         }
         Command::Unlink { path } => {
             unlink(&path)?;
-            println!(
-                "Unlinking for: {}",
-                path.into_string().or(Err(SharedError::PathError))?
-            );
+            println!("Finished Unlinking");
         }
-        Command::Install { path: _ } => todo!("This will be implemented soon"),
-        Command::Uninstall { path: _ } => todo!("This will be implemented soon"),
+        Command::Install { path } => install(&path)?,
+        Command::Uninstall { path } => uninstall(&path)?,
     };
     Ok(())
 }

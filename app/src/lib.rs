@@ -1,3 +1,3 @@
+pub mod commands;
+pub mod config;
 pub mod error;
-pub mod link;
-pub mod unlink;

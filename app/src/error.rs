@@ -11,6 +11,8 @@ pub enum DotyError {
     ClapError(clap::Error),
     UnLinkError(UnLinkError),
     SharedError(SharedError),
+    ParsError,
+    NoConfigForOs,
 }
 
 #[derive(Debug)]
@@ -18,6 +20,7 @@ pub enum SharedError {
     HomeDirError,
     ReadError(PathBuf, io::Error),
     PathError,
+    PermissionError(String, io::Error),
 }
 #[derive(Debug)]
 pub enum LinkError {
@@ -46,6 +49,8 @@ impl Display for DotyError {
             DotyError::ClapError(error) => write!(f, "{}", error),
             DotyError::UnLinkError(un_link_error) => write!(f, "{}", un_link_error),
             DotyError::SharedError(shared_error) => write!(f, "{}", shared_error),
+            DotyError::ParsError => write!(f, "Unable to pars config"),
+            DotyError::NoConfigForOs => write!(f, "No config for this OS"),
         }
     }
 }
@@ -81,6 +86,9 @@ impl Display for SharedError {
                     path_buf.display(),
                     error
                 )
+            }
+            SharedError::PermissionError(message, error) => {
+                write!(f, "{}, error: {}", message, error)
             }
         }
     }
