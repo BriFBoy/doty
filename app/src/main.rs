@@ -2,7 +2,8 @@ use std::{path::PathBuf, process::ExitCode};
 
 use clap::{Parser, Subcommand};
 use doty::{
-    commands::{install::install, link::symlink_dir, uninstall::uninstall, unlink::unlink},
+    commands::{install_or_remove, link::symlink_dir, unlink::unlink},
+    config::fs_interact::RunMode::{Install, Uninstall},
     error::DotyError,
 };
 
@@ -48,8 +49,8 @@ fn run(cli: Args) -> Result<(), DotyError> {
             unlink(&path)?;
             println!("Finished Unlinking");
         }
-        Command::Install { path } => install(&path)?,
-        Command::Uninstall { path } => uninstall(&path)?,
+        Command::Install { path } => install_or_remove(&path, Install)?,
+        Command::Uninstall { path } => install_or_remove(&path, Uninstall)?,
     };
     Ok(())
 }

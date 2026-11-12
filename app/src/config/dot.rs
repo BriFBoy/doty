@@ -1,14 +1,23 @@
-use std::{collections::HashMap, path::PathBuf};
+use std::{
+    collections::HashMap,
+    path::{Path, PathBuf},
+};
 
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
 pub struct Dot {
+    #[serde(flatten)]
     pub target: HashMap<String, DotConfig>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct DotConfig {
-    pub install: PathBuf,
-    pub uninstall: PathBuf,
+    script: PathBuf,
+}
+
+impl DotConfig {
+    pub fn get_script(&self) -> &Path {
+        &self.script
+    }
 }
