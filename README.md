@@ -28,24 +28,27 @@ doty uninstall vim   # alias: doty ui
 
 - `link` mirrors the package into `$HOME`: existing symlinks are skipped,
 existing directories are descended into, and a conflicting real file is an error.
-- The package argument and the script paths in `dot.toml` are resolved
-relative to your current working directory.
+- The package argument is resolved relative to your current working
+  directory; the `script` path in `dot.toml` is resolved relative to the
+  package directory.
 
 ## Configuration
 
-Each package can contain a `dot.toml` mapping OS IDs to install/uninstall scripts:
+Each package can contain a `dot.toml` mapping OS IDs to a script:
 
 ```toml
 # vim/dot.toml
-[target.fedora]
-install = "./vim/install.sh"
-uninstall = "./vim/uninstall.sh"
+[fedora]
+script = "install.sh"
 
-[target.arch]
-install = "./vim/install-arch.sh"
-uninstall = "./vim/uninstall-arch.sh"
+[arch]
+script = "install-arch.sh"
 ```
 
-The OS ID is read from the `ID` field of `/etc/os-release`,
+The table name is the OS ID, read from the `ID` field of `/etc/os-release`,
 so any Linux distro works as a target. If there is no entry for your OS,
 doty refuses to run a script rather than guessing.
+
+`script` is the path to a single script, relative to the package directory.
+doty runs it as `<script> install` or `<script> uninstall` and sets the
+executable bit if it is missing.
