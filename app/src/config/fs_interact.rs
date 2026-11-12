@@ -46,7 +46,7 @@ pub fn run_script(script: &Path, mode: RunMode, package: &Path) -> Result<(), Do
     .join(script);
 
     if !script.exists() {
-        return Err(DotyError::ConfigError);
+        return Err(DotyError::ConfigError("Srip does not exists".to_string()));
     }
 
     set_needed_permissions(script)?;
