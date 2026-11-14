@@ -2,7 +2,7 @@ use std::{path::PathBuf, process::ExitCode};
 
 use clap::{Parser, Subcommand};
 use doty::{
-    commands::{install_or_remove, link::symlink_dir, unlink::unlink},
+    commands::{install_or_remove, link::link, unlink::unlink},
     config::fs_interact::RunMode::{Install, Uninstall},
     error::DotyError,
 };
@@ -42,7 +42,7 @@ fn main() -> ExitCode {
 fn run(cli: Args) -> Result<(), DotyError> {
     match cli.command {
         Command::Link { path } => {
-            symlink_dir(&path)?;
+            link(&path)?;
             println!("Finished symlinking");
         }
         Command::Unlink { path } => {

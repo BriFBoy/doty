@@ -1,27 +1,24 @@
-use std::{env::current_dir, fs, os::unix::fs::PermissionsExt, path::Path, process::Command};
-
-use crate::{
-    config::dot::Dot,
-    error::{
-        DotyError::{self, ParsError},
-        SharedError::{self, PermissionError},
-    },
+use std::{
+    env::current_dir, fmt::Display, fs, os::unix::fs::PermissionsExt, path::Path, process::Command,
 };
 
+use crate::error::{
+    DotyError::{self},
+    SharedError::{self, PermissionError},
+};
+
+#[derive(Debug, Clone)]
 pub enum RunMode {
     Install,
     Uninstall,
 }
-
-pub fn load_config(package: &Path) -> Result<Dot, DotyError> {
-    let mut dot_file = Path::join(
-        &current_dir().map_err(|_| DotyError::SharedError(SharedError::PathError))?,
-        package,
-    );
-    dot_file.push("dot.toml");
-    let string = fs::read_to_string(dot_file).map_err(|_| ParsError)?;
-    let config: Dot = toml::from_str(&string).map_err(|_| ParsError)?;
-    Ok(config)
+impl Display for RunMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RunMode::Install => write!(f, "Install"),
+            RunMode::Uninstall => write!(f, "Uninstall"),
+        }
+    }
 }
 
 pub fn set_needed_permissions(script: &Path) -> Result<(), DotyError> {
@@ -59,8 +56,11 @@ pub fn run_script(script: &Path, mode: &RunMode, package: &Path) -> Result<(), D
         .arg(arg)
         .spawn()
         .map_err(|e| DotyError::SharedError(SharedError::PermissionError("".to_string(), e)))?;
-    child
+    let status = child
         .wait()
-        .map_err(|_| DotyError::SharedError(SharedError::HomeDirError))?;
+        .map_err(|_| DotyError::FailedScript(package.to_path_buf(), mode.clone()))?;
+    if !status.success() {
+        return Err(DotyError::FailedScript(package.to_path_buf(), mode.clone()));
+    }
     Ok(())
 }
