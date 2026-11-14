@@ -1,2 +1,11 @@
 [fedora]
 script = "install.sh"
+
+[arch]
+script = "install.sh"
+
+[debian]
+script = "install.sh"
+
+[ubuntu]
+script = "install.sh"

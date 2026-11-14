@@ -38,7 +38,7 @@ pub fn set_needed_permissions(script: &Path) -> Result<(), DotyError> {
     Ok(())
 }
 
-pub fn run_script(script: &Path, mode: RunMode, package: &Path) -> Result<(), DotyError> {
+pub fn run_script(script: &Path, mode: &RunMode, package: &Path) -> Result<(), DotyError> {
     let script = &Path::join(
         &current_dir().map_err(|_| DotyError::SharedError(SharedError::PathError))?,
         package,
@@ -46,7 +46,7 @@ pub fn run_script(script: &Path, mode: RunMode, package: &Path) -> Result<(), Do
     .join(script);
 
     if !script.exists() {
-        return Err(DotyError::ConfigError("Srip does not exists".to_string()));
+        return Err(DotyError::ConfigError("Script does not exists".to_string()));
     }
 
     set_needed_permissions(script)?;
