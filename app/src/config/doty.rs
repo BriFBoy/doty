@@ -29,11 +29,23 @@ impl DotyConfig {
     }
 
     pub fn get_fallback(&self) -> &str {
-        &self.packages.fallback
+        if let Some(fallback) = &self.packages.fallback {
+            fallback
+        } else {
+            "once"
+        }
+    }
+    pub fn get_conflict(&self) -> &str {
+        if let Some(conflict) = &self.packages.conflict {
+            conflict
+        } else {
+            "error"
+        }
     }
 }
 
 #[derive(Deserialize)]
 struct Packages {
-    fallback: String,
+    fallback: Option<String>,
+    conflict: Option<String>,
 }
