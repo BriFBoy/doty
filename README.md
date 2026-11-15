@@ -5,8 +5,24 @@ A dotfile manager and OS-aware installer written in Rust 🦀
 [![Rust](https://github.com/BriFBoy/doty/actions/workflows/rust.yml/badge.svg)](https://github.com/BriFBoy/doty/actions/workflows/rust.yml)
 [![GitHub stars](https://img.shields.io/github/stars/BriFBoy/doty?style=social)](https://github.com/BriFBoy/doty/stargazers)
 
-doty is in early development; installation instructions will be added once a
-release is available. Packages use the same file structure as GNU Stow.
+doty is in early development and might contain some bugs. Please feel free to
+open an issue if you find one.
+
+## Installation
+
+The install script is for Linux x86_64 and aarch64. It installs to `~/.local/bin/doty`.
+Use this command for a one-line install:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/BriFBoy/doty/master/install.sh | sh
+```
+
+If you get `command not found` afterwards, ~/.local/bin might be missing
+from your PATH. Add this to your `~/.bashrc`:
+
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+```
 
 ## Usage
 
