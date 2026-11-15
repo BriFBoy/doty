@@ -5,6 +5,8 @@ use std::{
     path::PathBuf,
 };
 
+use crate::config::fs_interact::RunMode;
+
 #[derive(Debug)]
 pub enum DotyError {
     LinkError(LinkError),
@@ -14,6 +16,7 @@ pub enum DotyError {
     ParsError,
     ConfigError(String),
     NoConfigForOs,
+    FailedScript(PathBuf, RunMode),
 }
 
 #[derive(Debug)]
@@ -54,6 +57,14 @@ impl Display for DotyError {
             DotyError::NoConfigForOs => write!(f, "No config for this OS"),
             DotyError::ConfigError(reason) => {
                 write!(f, "Something wrong in the config: {}", reason)
+            }
+            DotyError::FailedScript(package, mode) => {
+                write!(
+                    f,
+                    "Script of package {} failed while trying to {}",
+                    package.display(),
+                    mode
+                )
             }
         }
     }

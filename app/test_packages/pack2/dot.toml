@@ -1,0 +1,5 @@
+exclude = ["install.sh", "dot.toml"]
+depends_on = ["pack1"]
+
+[fedora]
+script = "install.sh"

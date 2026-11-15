@@ -1,6 +1,6 @@
 use std::{
     env::{current_dir, home_dir},
-    fs::{read_dir, remove_dir_all, remove_file},
+    fs::{self, read_dir, remove_dir_all, remove_file},
     path::{Path, PathBuf},
 };
 
@@ -42,7 +42,9 @@ fn dir_handle(
     let home_path = Path::join(home_dir, relative_path);
 
     if home_path.is_symlink() {
-        remove_dir_all(&home_path).map_err(|e| UnLinkError::RemoveError(home_path, e))?;
+        if fs::read_link(&home_path).map_err(UnLinkError::IoError)? == item {
+            remove_file(&home_path).map_err(|e| UnLinkError::RemoveError(home_path, e))?;
+        }
     } else if home_path.exists() {
         for item in read_dir(&item).map_err(|e| SharedError::ReadError(item, e))? {
             queue.append(item?.path());
@@ -57,9 +59,11 @@ fn file_handle(home_dir: &Path, current_dir: &PathBuf, item: PathBuf) -> Result<
         .or(Err(SharedError::HomeDirError))?;
     let home_path = Path::join(home_dir, relative_path);
 
-    if !home_path.exists() {
-    } else if home_path.is_symlink() {
-        remove_file(&home_path).map_err(|e| UnLinkError::RemoveError(home_path, e))?;
+    if home_path.is_symlink() {
+        if fs::read_link(&home_path).map_err(UnLinkError::IoError)? == item {
+            remove_file(&home_path).map_err(|e| UnLinkError::RemoveError(home_path, e))?;
+        }
+    } else if !home_path.exists() {
     } else {
         for parent in home_path.ancestors() {
             if parent.is_symlink() {

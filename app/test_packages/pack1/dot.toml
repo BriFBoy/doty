@@ -1,0 +1,14 @@
+exclude = ["exclude_me.txt", "install.sh", "dot.toml", "exclude_me/"]
+depends_on = []
+
+[fedora]
+script = "install.sh"
+
+[arch]
+script = "install.sh"
+
+[debian]
+script = "install.sh"
+
+[ubuntu]
+script = "install.sh"
