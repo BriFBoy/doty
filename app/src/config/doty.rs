@@ -18,12 +18,16 @@ impl DotyConfig {
             &current_dir().map_err(|_| SharedError::HomeDirError)?,
             "doty.toml",
         );
+
         if !config_path.exists() {
-            return Err(DotyError::ConfigError(
-                "Did not found the doty config".to_string(),
-            ));
+            return Ok(DotyConfig::default());
         }
-        let config: DotyConfig = toml::from_str(&fs::read_to_string(config_path).unwrap()).unwrap();
+
+        let config: DotyConfig = toml::from_str(
+            &fs::read_to_string(&config_path)
+                .map_err(|e| SharedError::ReadError(config_path.clone(), e))?,
+        )
+        .map_err(|_| DotyError::ConfigError(format!("Unable to pars {}", config_path.display())))?;
 
         Ok(config)
     }
@@ -40,6 +44,16 @@ impl DotyConfig {
             conflict
         } else {
             "error"
+        }
+    }
+}
+impl Default for DotyConfig {
+    fn default() -> Self {
+        Self {
+            packages: Packages {
+                fallback: Some("once".to_string()),
+                conflict: Some("error".to_string()),
+            },
         }
     }
 }

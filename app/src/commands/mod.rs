@@ -63,6 +63,7 @@ pub fn install_or_remove(package: &Path, mode: RunMode) -> Result<(), DotyError>
     Err(DotyError::NoConfigForOs)
 }
 
+// TODO: Fix stack overflow when package has circular deps
 fn install_dependent_packages(deps: &Vec<String>) -> Result<(), DotyError> {
     for dep in deps {
         println!("Installing dependencies");

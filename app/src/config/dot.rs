@@ -12,9 +12,11 @@ use crate::error::{
     SharedError,
 };
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Default)]
 pub struct DotConfig {
+    #[serde(default)]
     pub exclude: Vec<String>,
+    #[serde(default)]
     pub depends_on: Vec<String>,
     #[serde(flatten)]
     pub target: HashMap<String, OsConfig>,
@@ -24,8 +26,12 @@ impl DotConfig {
     pub fn load_config(package: &Path) -> Result<DotConfig, DotyError> {
         let mut dot_file = Path::join(&current_dir().map_err(|_| SharedError::PathError)?, package);
         dot_file.push("dot.toml");
-        let string = fs::read_to_string(dot_file).map_err(|_| ParsError)?;
-        let config: DotConfig = toml::from_str(&string).map_err(|_| ParsError)?;
+        if !dot_file.exists() {
+            return Ok(DotConfig::default());
+        }
+        let config: DotConfig =
+            toml::from_str(&fs::read_to_string(dot_file).map_err(|_| ParsError)?)
+                .map_err(|_| ParsError)?;
         Ok(config)
     }
 }

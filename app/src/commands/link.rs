@@ -30,17 +30,17 @@ pub fn link(package: &PathBuf) -> Result<(), DotyError> {
         );
     }
     while let Some(item) = queue.take() {
+        let relative_path = item
+            .strip_prefix(&current_dir)
+            .or(Err(SharedError::PathError))?;
+        if is_excluded(&package_config, relative_path)? {
+            continue;
+        }
+
         if item.is_dir() {
-            dir_handle(
-                &home_dir,
-                &current_dir,
-                &mut queue,
-                item,
-                &package_config,
-                &doty_config,
-            )?;
+            dir_handle(&home_dir, &current_dir, &mut queue, item, &doty_config)?;
         } else if item.is_file() {
-            file_handle(&home_dir, &current_dir, item, &package_config, &doty_config)?;
+            file_handle(&home_dir, &current_dir, item, &doty_config)?;
         }
     }
 
@@ -52,7 +52,6 @@ fn dir_handle(
     current_dir: &Path,
     queue: &mut Queue<PathBuf>,
     item: PathBuf,
-    config: &DotConfig,
     doty_config: &DotyConfig,
 ) -> Result<(), DotyError> {
     let relative_path = item
@@ -66,13 +65,13 @@ fn dir_handle(
             Ok(())
         }
     } else if !home_path.exists() {
-        if is_excluded(config, relative_path)? {
-            return Ok(());
-        }
-
         symlink(&item, home_path).map_err(|e| LinkError::SymlinkError(item, e))?;
         Ok(())
     } else {
+        if !home_path.is_dir() {
+            return handle_conflict(item, doty_config, home_path);
+        }
+
         for diritem in read_dir(&item).map_err(|e| SharedError::ReadError(item.clone(), e))? {
             queue.append(
                 diritem
@@ -88,7 +87,6 @@ fn file_handle(
     home_dir: &Path,
     current_dir: &PathBuf,
     item: PathBuf,
-    config: &DotConfig,
     doty_config: &DotyConfig,
 ) -> Result<(), DotyError> {
     let relative_path = item
@@ -103,16 +101,9 @@ fn file_handle(
             Ok(())
         }
     } else if !home_path.exists() {
-        if is_excluded(config, relative_path)? {
-            return Ok(());
-        }
-
         symlink(&item, home_path).map_err(|e| LinkError::SymlinkError(item, e))?;
         Ok(())
     } else {
-        if is_excluded(config, relative_path)? {
-            return Ok(());
-        }
         handle_conflict(item, doty_config, home_path)
     }
 }
@@ -149,12 +140,19 @@ fn handle_conflict(
                 home_path.file_name().ok_or(DotyError::ParsError)?.display()
             );
             let mut backup_name = home_path.clone();
-            let mut name = backup_name
+            let mut base = backup_name
                 .file_name()
                 .ok_or(SharedError::PathError)?
                 .to_owned();
-            name.push(".bak");
-            backup_name.set_file_name(name);
+            base.push(".bak");
+            backup_name.set_file_name(&base);
+            let mut n = 0;
+            while backup_name.exists() {
+                let mut name = base.clone();
+                name.push(format!(".{}", n));
+                backup_name.set_file_name(&name);
+                n += 1;
+            }
 
             rename(&home_path, backup_name).map_err(LinkError::IoError)?;
             symlink(&item, &home_path).map_err(|e| LinkError::SymlinkError(item, e))?;
