@@ -14,11 +14,12 @@ use crate::{
     },
 };
 
+pub mod bundle;
 pub mod link;
 pub mod unlink;
 
 /// Runs the install or remove command.
-pub fn install_or_remove(package: &Path, mode: RunMode) -> Result<(), DotyError> {
+pub fn install_or_remove(package: &Path, mode: &RunMode) -> Result<(), DotyError> {
     let doty_config = DotyConfig::load_from_cwd()?;
     let os_type = get_os_id().ok_or(SharedError::PathError)?;
     let config = DotConfig::load_config(package)?;
@@ -67,7 +68,7 @@ pub fn install_or_remove(package: &Path, mode: RunMode) -> Result<(), DotyError>
 fn install_dependent_packages(deps: &Vec<String>) -> Result<(), DotyError> {
     for dep in deps {
         println!("Installing dependencies");
-        install_or_remove(Path::new(dep), RunMode::Install)?;
+        install_or_remove(Path::new(dep), &RunMode::Install)?;
     }
     Ok(())
 }

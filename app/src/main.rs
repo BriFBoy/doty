@@ -2,7 +2,12 @@ use std::{path::PathBuf, process::ExitCode};
 
 use clap::{Parser, Subcommand};
 use doty::{
-    commands::{install_or_remove, link::link, unlink::unlink},
+    commands::{
+        bundle::{install_or_remove_bundles, list_bundles},
+        install_or_remove,
+        link::link,
+        unlink::unlink,
+    },
     config::fs_interact::RunMode::{Install, Uninstall},
     error::DotyError,
 };
@@ -26,6 +31,16 @@ enum Command {
     Install { path: PathBuf },
     #[command(visible_alias = "ui")]
     Uninstall { path: PathBuf },
+
+    #[command(subcommand)]
+    Bundle(Bundle),
+}
+
+#[derive(Subcommand)]
+enum Bundle {
+    List,
+    Install { name: String },
+    Uninstall { name: String },
 }
 
 fn main() -> ExitCode {
@@ -49,8 +64,13 @@ fn run(cli: Args) -> Result<(), DotyError> {
             unlink(&path)?;
             println!("Finished Unlinking");
         }
-        Command::Install { path } => install_or_remove(&path, Install)?,
-        Command::Uninstall { path } => install_or_remove(&path, Uninstall)?,
+        Command::Install { path } => install_or_remove(&path, &Install)?,
+        Command::Uninstall { path } => install_or_remove(&path, &Uninstall)?,
+        Command::Bundle(bundle) => match bundle {
+            Bundle::List => list_bundles()?,
+            Bundle::Install { name } => install_or_remove_bundles(&name, &Install)?,
+            Bundle::Uninstall { name } => install_or_remove_bundles(&name, &Uninstall)?,
+        },
     };
     Ok(())
 }
