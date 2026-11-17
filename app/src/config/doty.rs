@@ -1,4 +1,4 @@
-use std::{env::current_dir, fs, path::Path};
+use std::{collections::BTreeMap, env::current_dir, fs, path::Path};
 
 use serde::Deserialize;
 
@@ -10,6 +10,13 @@ use crate::error::{
 #[derive(Deserialize)]
 pub struct DotyConfig {
     packages: Packages,
+    bundles: Option<BTreeMap<String, Vec<String>>>,
+}
+
+#[derive(Deserialize)]
+struct Packages {
+    fallback: Option<String>,
+    conflict: Option<String>,
 }
 
 impl DotyConfig {
@@ -46,6 +53,17 @@ impl DotyConfig {
             "error"
         }
     }
+    pub fn get_bundle(&self, key: &str) -> Option<&Vec<String>> {
+        match &self.bundles {
+            Some(btreemap) => btreemap.get(key),
+            None => None,
+        }
+    }
+    pub fn get_bundles(&self) -> Option<Vec<&String>> {
+        self.bundles
+            .as_ref()
+            .map(|btreemap| btreemap.keys().collect())
+    }
 }
 impl Default for DotyConfig {
     fn default() -> Self {
@@ -54,12 +72,7 @@ impl Default for DotyConfig {
                 fallback: Some("once".to_string()),
                 conflict: Some("error".to_string()),
             },
+            bundles: Some(BTreeMap::<String, Vec<String>>::new()),
         }
     }
-}
-
-#[derive(Deserialize)]
-struct Packages {
-    fallback: Option<String>,
-    conflict: Option<String>,
 }

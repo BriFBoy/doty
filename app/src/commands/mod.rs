@@ -14,6 +14,7 @@ use crate::{
     },
 };
 
+pub mod bundle;
 pub mod link;
 pub mod unlink;
 
@@ -27,7 +28,7 @@ pub fn install_or_remove(package: &Path, mode: RunMode) -> Result<(), DotyError>
         if let RunMode::Install = mode {
             install_dependent_packages(&config.depends_on)?;
         }
-        run_script(os.get_script(), &mode, package)?;
+        run_script(os.get_script(), mode, package)?;
         return Ok(());
     }
 
@@ -42,7 +43,7 @@ pub fn install_or_remove(package: &Path, mode: RunMode) -> Result<(), DotyError>
                 install_dependent_packages(&config.depends_on)?;
             }
 
-            run_script(os.get_script(), &mode, package)?;
+            run_script(os.get_script(), mode, package)?;
             return Ok(());
         }
     } else if doty_config.get_fallback() == "full" {
@@ -53,7 +54,7 @@ pub fn install_or_remove(package: &Path, mode: RunMode) -> Result<(), DotyError>
                     install_dependent_packages(&config.depends_on)?;
                 }
 
-                run_script(os.get_script(), &mode, package)?;
+                run_script(os.get_script(), mode, package)?;
                 return Ok(());
             }
         }
