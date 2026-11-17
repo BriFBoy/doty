@@ -32,14 +32,17 @@ enum Command {
     #[command(visible_alias = "ui")]
     Uninstall { path: PathBuf },
 
-    #[command(subcommand)]
+    #[command(subcommand, visible_alias = "b")]
     Bundle(Bundle),
 }
 
 #[derive(Subcommand)]
 enum Bundle {
+    #[command(visible_alias = "l")]
     List,
+    #[command(visible_alias = "i")]
     Install { name: String },
+    #[command(visible_alias = "ui")]
     Uninstall { name: String },
 }
 

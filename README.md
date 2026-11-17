@@ -40,6 +40,15 @@ doty install vim     # alias: doty i
 
 # Run the uninstall script for the current OS
 doty uninstall vim   # alias: doty ui
+
+# List all bundles
+doty bundle list   # alias: doty b l 
+
+# Install bundle
+doty bundle install dev   # alias: doty b i
+
+# Uninstall bundle
+doty bundle uninstall dev   # alias: doty b ui 
 ```
 
 - `link` mirrors the package into `$HOME`: existing symlinks are skipped,
@@ -54,6 +63,9 @@ Each package can contain a `dot.toml` mapping OS IDs to a script:
 
 ```toml
 # vim/dot.toml
+exclude = ["local/"]
+depends_on = ["base"]
+
 [fedora]
 script = "install.sh"
 
@@ -67,4 +79,26 @@ doty refuses to run a script rather than guessing.
 
 `script` is the path to a single script, relative to the package directory.
 doty runs it as `<script> install` or `<script> uninstall` and sets the
-executable bit if it is missing.
+executable bit if it is missing. `exclude` is a list of glob patterns.
+matching paths are left untouched by `link`, `depends_on` lists packages
+that are installed first when running `install`.
+
+Optionally, a `doty.toml` in the directory you run doty from configures
+the project:
+
+```toml
+[packages]
+fallback = "full"
+conflict = "backup"
+
+[bundles]
+dev = ["vim", "zsh"]
+```
+
+`fallback` controls how far doty looks in the `ID_LIKE` field when there
+is no entry for your OS, `once` (the default) tries only the first
+candidate, `full` tries all of them in order. `conflict` decides what
+`link` does when a real file is in the way. `error` (the default) stops,
+`skip` leaves the file, `force` replaces it, and `backup` moves it aside
+as `name.bak`. `bundles` defines named groups of packages for
+`doty bundle install` and `doty bundle uninstall`.
