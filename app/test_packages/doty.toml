@@ -1,6 +1,3 @@
 [packages]
 fallback = "full"
 conflict = "backup"
-
-[bundles]
-dev = ["pack1", "pack2"]

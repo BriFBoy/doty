@@ -19,7 +19,7 @@ pub mod link;
 pub mod unlink;
 
 /// Runs the install or remove command.
-pub fn install_or_remove(package: &Path, mode: &RunMode) -> Result<(), DotyError> {
+pub fn install_or_remove(package: &Path, mode: RunMode) -> Result<(), DotyError> {
     let doty_config = DotyConfig::load_from_cwd()?;
     let os_type = get_os_id().ok_or(SharedError::PathError)?;
     let config = DotConfig::load_config(package)?;
@@ -28,7 +28,7 @@ pub fn install_or_remove(package: &Path, mode: &RunMode) -> Result<(), DotyError
         if let RunMode::Install = mode {
             install_dependent_packages(&config.depends_on)?;
         }
-        run_script(os.get_script(), &mode, package)?;
+        run_script(os.get_script(), mode, package)?;
         return Ok(());
     }
 
@@ -43,7 +43,7 @@ pub fn install_or_remove(package: &Path, mode: &RunMode) -> Result<(), DotyError
                 install_dependent_packages(&config.depends_on)?;
             }
 
-            run_script(os.get_script(), &mode, package)?;
+            run_script(os.get_script(), mode, package)?;
             return Ok(());
         }
     } else if doty_config.get_fallback() == "full" {
@@ -54,7 +54,7 @@ pub fn install_or_remove(package: &Path, mode: &RunMode) -> Result<(), DotyError
                     install_dependent_packages(&config.depends_on)?;
                 }
 
-                run_script(os.get_script(), &mode, package)?;
+                run_script(os.get_script(), mode, package)?;
                 return Ok(());
             }
         }
@@ -68,7 +68,7 @@ pub fn install_or_remove(package: &Path, mode: &RunMode) -> Result<(), DotyError
 fn install_dependent_packages(deps: &Vec<String>) -> Result<(), DotyError> {
     for dep in deps {
         println!("Installing dependencies");
-        install_or_remove(Path::new(dep), &RunMode::Install)?;
+        install_or_remove(Path::new(dep), RunMode::Install)?;
     }
     Ok(())
 }

@@ -64,12 +64,12 @@ fn run(cli: Args) -> Result<(), DotyError> {
             unlink(&path)?;
             println!("Finished Unlinking");
         }
-        Command::Install { path } => install_or_remove(&path, &Install)?,
-        Command::Uninstall { path } => install_or_remove(&path, &Uninstall)?,
+        Command::Install { path } => install_or_remove(&path, Install)?,
+        Command::Uninstall { path } => install_or_remove(&path, Uninstall)?,
         Command::Bundle(bundle) => match bundle {
             Bundle::List => list_bundles()?,
-            Bundle::Install { name } => install_or_remove_bundles(&name, &Install)?,
-            Bundle::Uninstall { name } => install_or_remove_bundles(&name, &Uninstall)?,
+            Bundle::Install { name } => install_or_remove_bundles(&name, Install)?,
+            Bundle::Uninstall { name } => install_or_remove_bundles(&name, Uninstall)?,
         },
     };
     Ok(())

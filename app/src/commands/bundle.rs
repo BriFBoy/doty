@@ -4,7 +4,7 @@ use crate::{
     commands::install_or_remove,
     config::{
         doty::DotyConfig,
-        fs_interact::RunMode::{self, Install},
+        fs_interact::RunMode::{self},
     },
     error::DotyError,
 };
@@ -14,10 +14,10 @@ pub fn list_bundles() -> Result<(), DotyError> {
     let bundles = config.get_bundles();
 
     match bundles {
-        Some(e) => {
+        Some(packages) => {
             println!("Bundles:");
-            for f in e {
-                println!("\t{}", f)
+            for package in packages {
+                println!("\t{package}",)
             }
         }
 
@@ -26,19 +26,20 @@ pub fn list_bundles() -> Result<(), DotyError> {
 
     Ok(())
 }
-pub fn install_or_remove_bundles(name: &str, mode: &RunMode) -> Result<(), DotyError> {
+pub fn install_or_remove_bundles(name: &str, mode: RunMode) -> Result<(), DotyError> {
     let config = DotyConfig::load_from_cwd()?;
     let bundle = config.get_bundle(name);
 
     match bundle {
-        Some(e) => {
-            for package in e {
+        Some(packages) => {
+            for package in packages {
                 install_or_remove(Path::new(package), mode)?;
             }
+            Ok(())
         }
 
-        None => println!("No bundle with given name"),
+        None => Err(DotyError::ConfigError(
+            "No bundle found with given name".into(),
+        )),
     }
-
-    Ok(())
 }

@@ -55,12 +55,14 @@ impl DotyConfig {
     }
     pub fn get_bundle(&self, key: &str) -> Option<&Vec<String>> {
         match &self.bundles {
-            Some(b) => b.get(key),
+            Some(btreemap) => btreemap.get(key),
             None => None,
         }
     }
-    pub fn get_bundles(&self) -> Option<Vec<String>> {
-        self.bundles.as_ref().map(|b| b.keys().cloned().collect())
+    pub fn get_bundles(&self) -> Option<Vec<&String>> {
+        self.bundles
+            .as_ref()
+            .map(|btreemap| btreemap.keys().collect())
     }
 }
 impl Default for DotyConfig {

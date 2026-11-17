@@ -7,7 +7,7 @@ use crate::error::{
     SharedError::{self, PermissionError},
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum RunMode {
     Install,
     Uninstall,
@@ -35,7 +35,7 @@ pub fn set_needed_permissions(script: &Path) -> Result<(), DotyError> {
     Ok(())
 }
 
-pub fn run_script(script: &Path, mode: &RunMode, package: &Path) -> Result<(), DotyError> {
+pub fn run_script(script: &Path, mode: RunMode, package: &Path) -> Result<(), DotyError> {
     let script = &Path::join(
         &current_dir().map_err(|_| DotyError::SharedError(SharedError::PathError))?,
         package,
