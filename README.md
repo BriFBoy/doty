@@ -24,42 +24,61 @@ from your PATH. Add this to your `~/.bashrc`:
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 ```
 
+## How it works
+
+doty works on a stow directory, a folder that contains your dotfile
+packages. Each package is a directory with the files you want in your
+home directory. You run doty from the stow directory.
+
+`link` mirrors a package into your home directory with symlinks. `install`
+runs its OS-specific script. They are independent, so you can use either
+alone or both.
+
+Symlinks use absolute paths into the stow directory, so moving it breaks
+the links.
+
 ## Usage
 
-Run from your stow directory (the parent of your packages):
+| Command | Alias | What it does |
+| --- | --- | --- |
+| `doty link <package>` | `doty l` | Symlinks the package into your home directory |
+| `doty unlink <package>` | `doty ul` | Removes the symlinks doty created for the package |
+| `doty install <package>` | `doty i` | Runs the install script for your OS |
+| `doty uninstall <package>` | `doty ui` | Runs the uninstall script for your OS |
+| `doty bundle list` | `doty b l` | Lists the bundles in your doty.toml |
+| `doty bundle install <name>` | `doty b i` | Runs the install scripts of all packages in the bundle |
+| `doty bundle uninstall <name>` | `doty b ui` | Runs the uninstall scripts of all packages in the bundle |
 
-```bash
-# Symlink a package into your home directory
-doty link vim        # alias: doty l
+Package names are relative to the directory you run doty from. There is no
+bulk link, so you run `doty link` once per package.
 
-# Remove the symlinks again
-doty unlink vim      # alias: doty ul
+## Package layout
 
-# Run the install script for the current OS 
-doty install vim     # alias: doty i
+A stow directory typically looks like this:
 
-# Run the uninstall script for the current OS
-doty uninstall vim   # alias: doty ui
-
-# List all bundles
-doty bundle list   # alias: doty b l 
-
-# Install bundle
-doty bundle install dev   # alias: doty b i
-
-# Uninstall bundle
-doty bundle uninstall dev   # alias: doty b ui 
+```
+dotfiles/
+├── doty.toml
+├── base/
+│   ├── dot.toml
+│   └── .bashrc
+└── vim/
+    ├── dot.toml
+    ├── install.sh
+    └── .vimrc
 ```
 
-- `link` mirrors the package into `$HOME`: existing symlinks are skipped,
-existing directories are descended into, and a conflicting real file is an error.
-- The package argument is resolved relative to your current working
-  directory; the `script` path in `dot.toml` is resolved relative to the
-  package directory.
+Everything in a package is mirrored into your home directory as-is,
+including `dot.toml` and your install scripts.
+
+A package without a `dot.toml` can still be linked. It cannot be installed,
+because there is no script to run.
 
 ## Configuration
 
-Each package can contain a `dot.toml` mapping OS IDs to a script:
+### dot.toml
+
+Each package can contain a `dot.toml` that maps OS IDs to a script:
 
 ```toml
 # vim/dot.toml
@@ -73,18 +92,41 @@ script = "install.sh"
 script = "install-arch.sh"
 ```
 
-The table name is the OS ID, read from the `ID` field of `/etc/os-release`,
-so any Linux distro works as a target. If there is no entry for your OS,
-doty refuses to run a script rather than guessing.
+The table name is the OS ID from the `ID` field of `/etc/os-release`, so
+any Linux distro works. Without an entry for your OS, doty refuses to run
+a script rather than guessing.
 
-`script` is the path to a single script, relative to the package directory.
-doty runs it as `<script> install` or `<script> uninstall` and sets the
-executable bit if it is missing. `exclude` is a list of glob patterns.
-matching paths are left untouched by `link`, `depends_on` lists packages
-that are installed first when running `install`.
+Common IDs:
 
-Optionally, a `doty.toml` in the directory you run doty from configures
-the project:
+- `arch`
+- `debian`
+- `fedora`
+- `gentoo`
+- `nixos`
+- `opensuse-leap`
+- `ubuntu`
+- `void`
+
+`script` is a path relative to the package directory. doty runs it as
+`<script> install` or `<script> uninstall` and sets the executable bit if
+it is missing. The working directory is the stow directory, not the
+package.
+
+`depends_on` lists packages that are installed first. They are only
+installed, never uninstalled, and circular dependencies are not supported.
+
+`exclude` is a list of glob patterns that keep files out of the link. A
+typical package excludes its own `dot.toml` and install scripts:
+
+```toml
+exclude = ["dot.toml", "install.sh"]
+```
+
+See [Glob patterns](#glob-patterns-exclude) for how the patterns work.
+
+### doty.toml
+
+Optionally, a `doty.toml` in the stow directory configures the project:
 
 ```toml
 [packages]
@@ -95,10 +137,62 @@ conflict = "backup"
 dev = ["vim", "zsh"]
 ```
 
-`fallback` controls how far doty looks in the `ID_LIKE` field when there
-is no entry for your OS, `once` (the default) tries only the first
-candidate, `full` tries all of them in order. `conflict` decides what
-`link` does when a real file is in the way. `error` (the default) stops,
-`skip` leaves the file, `force` replaces it, and `backup` moves it aside
-as `name.bak`. `bundles` defines named groups of packages for
-`doty bundle install` and `doty bundle uninstall`.
+The `[packages]` table must exist, even when it is empty. doty does not
+parse a `doty.toml` without it.
+
+`fallback` controls how far doty looks in `ID_LIKE` when there is no entry
+for your OS. `once` (the default) tries only the first candidate, `full`
+tries all of them.
+
+`conflict` decides what `link` does when a real file or directory is in the
+way. `error` (the default) stops, `skip` leaves it, `force` replaces it,
+and `backup` moves it aside as `name.bak`, or `name.bak.0`, `name.bak.1`
+and so on.
+
+`Backup` will backup files from a different package if they overlap.
+This should not be a problem in normal use.
+
+### Bundles
+
+Bundles are named groups of packages in the `[bundles]` table. `doty
+bundle install dev` runs the install script of every package in the
+bundle, `doty bundle uninstall dev` the uninstall script.
+
+Bundles only run scripts. They never create or remove symlinks, so the
+packages in a bundle still need their own `doty link`.
+
+## Writing scripts
+
+The script receives `install` or `uninstall` as its first argument. It
+should only touch things belonging to its own package, and it should be
+idempotent so it is safe to run several times.
+
+```bash
+#!/bin/sh
+install() {
+  mkdir -p "$HOME/.config/myapp"
+}
+
+uninstall() {
+  rm -rf "$HOME/.config/myapp"
+}
+
+if [ "$1" = "install" ]; then
+  install
+elif [ "$1" = "uninstall" ]; then
+  uninstall
+fi
+```
+
+## Glob patterns (exclude)
+
+`exclude` only applies to files and directories at the top level of the
+package. A pattern is matched against the name of each top-level entry.
+`*` matches any name, `?` matches a single character, and `**` matches
+everything.
+
+| Pattern | Matches |
+| --- | --- |
+| `local` or `local/` | the top-level `local` directory |
+| `*.txt` | top-level `.txt` files |
+| `dot.toml` | the top-level `dot.toml` |
