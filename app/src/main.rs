@@ -21,10 +21,8 @@ struct Args {
 
 #[derive(Subcommand)]
 enum Command {
-    /// Symlinks a folder
     #[command(visible_alias = "l")]
     Link { path: PathBuf },
-    /// Removes symlink a folder
     #[command(visible_alias = "ul")]
     Unlink { path: PathBuf },
     #[command(visible_alias = "i")]
@@ -67,8 +65,14 @@ fn run(cli: Args) -> Result<(), DotyError> {
             unlink(&path)?;
             println!("Finished Unlinking");
         }
-        Command::Install { path } => install_or_remove(&path, Install)?,
-        Command::Uninstall { path } => install_or_remove(&path, Uninstall)?,
+        Command::Install { path } => {
+            install_or_remove(&path, Install)?;
+            link(&path)?;
+        }
+        Command::Uninstall { path } => {
+            install_or_remove(&path, Uninstall)?;
+            unlink(&path)?;
+        }
         Command::Bundle(bundle) => match bundle {
             Bundle::List => list_bundles()?,
             Bundle::Install { name } => install_or_remove_bundles(&name, Install)?,

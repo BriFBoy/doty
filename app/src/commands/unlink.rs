@@ -8,7 +8,7 @@ use datastruct::queue::Queue;
 
 use crate::error::{SharedError, UnLinkError};
 
-pub fn unlink(path: &PathBuf) -> Result<(), UnLinkError> {
+pub fn unlink(path: &Path) -> Result<(), UnLinkError> {
     let home_dir = home_dir().ok_or(SharedError::HomeDirError)?;
     let mut current_dir = current_dir()?;
     let mut queue: Queue<PathBuf> = Queue::new(None);

@@ -13,7 +13,7 @@ use crate::{
     error::{DotyError, LinkError, SharedError},
 };
 
-pub fn link(package: &PathBuf) -> Result<(), DotyError> {
+pub fn link(package: &Path) -> Result<(), DotyError> {
     let home_dir = home_dir().ok_or(SharedError::HomeDirError)?;
     let mut current_dir = current_dir().map_err(|_| SharedError::PathError)?;
     let mut queue: Queue<PathBuf> = Queue::new(None);

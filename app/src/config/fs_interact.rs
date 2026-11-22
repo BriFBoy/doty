@@ -22,7 +22,9 @@ impl Display for RunMode {
 }
 
 pub fn set_needed_permissions(script: &Path) -> Result<(), DotyError> {
-    let metadata = fs::metadata(script).unwrap();
+    let metadata = fs::metadata(script).map_err(|e| {
+        SharedError::PermissionError("Failed to get script file metadata".to_string(), e)
+    })?;
     let mut permisitons = metadata.permissions();
 
     if permisitons.mode() & 0o100 == 0 {
@@ -58,9 +60,9 @@ pub fn run_script(script: &Path, mode: RunMode, package: &Path) -> Result<(), Do
         .map_err(|e| DotyError::SharedError(SharedError::PermissionError("".to_string(), e)))?;
     let status = child
         .wait()
-        .map_err(|_| DotyError::FailedScript(package.to_path_buf(), mode.clone()))?;
+        .map_err(|_| DotyError::FailedScript(package.to_path_buf(), mode))?;
     if !status.success() {
-        return Err(DotyError::FailedScript(package.to_path_buf(), mode.clone()));
+        return Err(DotyError::FailedScript(package.to_path_buf(), mode));
     }
     Ok(())
 }

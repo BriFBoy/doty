@@ -1,10 +1,10 @@
 use std::path::Path;
 
 use crate::{
-    commands::install_or_remove,
+    commands::{install_or_remove, link::link, unlink::unlink},
     config::{
         doty::DotyConfig,
-        fs_interact::RunMode::{self},
+        fs_interact::RunMode::{self, Install, Uninstall},
     },
     error::DotyError,
 };
@@ -34,6 +34,10 @@ pub fn install_or_remove_bundles(name: &str, mode: RunMode) -> Result<(), DotyEr
         Some(packages) => {
             for package in packages {
                 install_or_remove(Path::new(package), mode)?;
+                match mode {
+                    Install => link(Path::new(package))?,
+                    Uninstall => unlink(Path::new(package))?,
+                }
             }
             Ok(())
         }
