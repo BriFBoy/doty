@@ -31,8 +31,8 @@ packages. Each package is a directory with the files you want in your
 home directory. You run doty from the stow directory.
 
 `link` mirrors a package into your home directory with symlinks. `install`
-runs its OS-specific script. They are independent, so you can use either
-alone or both.
+runs its OS-specific script and links the package as well.
+They are independent, so you can use either alone or both.
 
 Symlinks use absolute paths into the stow directory, so moving it breaks
 the links.
@@ -43,11 +43,11 @@ the links.
 | --- | --- | --- |
 | `doty link <package>` | `doty l` | Symlinks the package into your home directory |
 | `doty unlink <package>` | `doty ul` | Removes the symlinks doty created for the package |
-| `doty install <package>` | `doty i` | Runs the install script for your OS |
-| `doty uninstall <package>` | `doty ui` | Runs the uninstall script for your OS |
+| `doty install <package>` | `doty i` | Runs the install script for your OS and links the package |
+| `doty uninstall <package>` | `doty ui` | Runs the uninstall script for your OS and unlinks the package |
 | `doty bundle list` | `doty b l` | Lists the bundles in your doty.toml |
-| `doty bundle install <name>` | `doty b i` | Runs the install scripts of all packages in the bundle |
-| `doty bundle uninstall <name>` | `doty b ui` | Runs the uninstall scripts of all packages in the bundle |
+| `doty bundle install <name>` | `doty b i` | Runs the install scripts and links all packages in the bundle |
+| `doty bundle uninstall <name>` | `doty b ui` | Runs the uninstall scripts and unlinks all packages in the bundle |
 
 Package names are relative to the directory you run doty from. There is no
 bulk link, so you run `doty link` once per package.
@@ -149,7 +149,7 @@ way. `error` (the default) stops, `skip` leaves it, `force` replaces it,
 and `backup` moves it aside as `name.bak`, or `name.bak.0`, `name.bak.1`
 and so on.
 
-`Backup` will backup files from a different package if they overlap.
+`Backup` will back up files from a different package if they overlap.
 This should not be a problem in normal use.
 
 ### Bundles

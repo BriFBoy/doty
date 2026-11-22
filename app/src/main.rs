@@ -21,10 +21,8 @@ struct Args {
 
 #[derive(Subcommand)]
 enum Command {
-    /// Symlinks a folder
     #[command(visible_alias = "l")]
     Link { path: PathBuf },
-    /// Removes symlink a folder
     #[command(visible_alias = "ul")]
     Unlink { path: PathBuf },
     #[command(visible_alias = "i")]
