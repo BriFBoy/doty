@@ -67,8 +67,14 @@ fn run(cli: Args) -> Result<(), DotyError> {
             unlink(&path)?;
             println!("Finished Unlinking");
         }
-        Command::Install { path } => install_or_remove(&path, Install)?,
-        Command::Uninstall { path } => install_or_remove(&path, Uninstall)?,
+        Command::Install { path } => {
+            install_or_remove(&path, Install)?;
+            link(&path)?;
+        }
+        Command::Uninstall { path } => {
+            install_or_remove(&path, Uninstall)?;
+            unlink(&path)?;
+        }
         Command::Bundle(bundle) => match bundle {
             Bundle::List => list_bundles()?,
             Bundle::Install { name } => install_or_remove_bundles(&name, Install)?,
